@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel do Administrador - Açaíteria</title>
+  <style>
+/* ===== admin.css - Painel do Administrador Açaíteria ===== */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #faf7fe;
+  color: #333;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== LOGIN ===== */
+#login-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #5e1b73, #9c27b0);
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+#login-section h1 { font-size: 2rem; margin-bottom: 25px; }
+#login-section input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 14px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+}
+#login-section input:focus { outline: 3px solid rgba(255,255,255,0.25); }
+#login-section button {
+  background: #fff;
+  color: #5e1b73;
+  font-weight: 700;
+  border: none;
+  border-radius: 26px;
+  padding: 10px 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+  margin-top: 12px;
+  transition: transform 0.12s ease;
+}
+#login-section button:hover { transform: translateY(-2px); }
+#login-erro { color: #ffd6f5; margin-top: 12px; font-size: 0.95rem; }
+
+/* ===== PAINEL ADMIN ===== */
+#painel-admin {
+  max-width: 1150px;
+  margin: 40px auto;
+  padding: 0 16px 40px;
+}
+#painel-admin h1 {
+  color: #5e1b73;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 1.9rem;
+}
+#btn-logout {
+  display: block;
+  margin: 0 auto 30px;
+  background: linear-gradient(135deg, #9c27b0, #5e1b73);
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  font-weight: 600;
+  border-radius: 26px;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(92,20,106,0.12);
+  transition: transform 0.12s ease;
+}
+#btn-logout:hover { transform: translateY(-2px); }
+
+/* ===== SEÇÕES ===== */
+.admin-section {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 8px rgba(16,16,16,0.06);
+  margin-bottom: 22px;
+}
+.admin-section h2 {
+  color: #5e1b73;
+  margin-bottom: 14px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* ===== CHECKBOXES ===== */
+.admin-section div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+.admin-section div:hover {
+  background: #f4ebfb;
+  transform: translateX(4px);
+}
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #9c27b0;
+  cursor: pointer;
+}
+label {
+  cursor: pointer;
+  color: #333;
+  text-transform: capitalize;
+  font-size: 0.96rem;
+}
+
+/* ===== GRID ===== */
+#itens-container { display: grid; gap: 22px; }
+@media (min-width: 820px)  { #itens-container { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1100px) { #itens-container { grid-template-columns: repeat(3, 1fr); } }
+
+/* ===== SCROLL ===== */
+body { scrollbar-width: thin; scrollbar-color: #9c27b0 #faf7fe; }
+body::-webkit-scrollbar { width: 8px; }
+body::-webkit-scrollbar-thumb { background-color: #9c27b0; border-radius: 8px; }
+body::-webkit-scrollbar-track { background: #faf7fe; }
+
+/* ===== FOCUS ===== */
+button:focus, input:focus {
+  outline: 3px solid rgba(156,39,176,0.25);
+  outline-offset: 2px;
+}
+
+/* ===== LOADING ===== */
+#loading-itens {
+  text-align: center;
+  padding: 40px;
+  color: #9c27b0;
+  font-weight: 600;
+}
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #fff;
+  border: 1px solid #e0d0f0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  color: #5e1b73;
+  font-weight: 600;
+  box-shadow: 0 8px 32px rgba(92,20,106,0.15);
+  transform: translateY(80px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 999;
+  pointer-events: none;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  #painel-admin { margin: 20px auto; padding: 0 12px 30px; }
+  #painel-admin h1 { font-size: 1.5rem; }
+  #btn-logout { width: 100%; max-width: 300px; padding: 12px; }
+  .admin-section { padding: 14px; }
+  .admin-section h2 { font-size: 1.1rem; }
+  label { font-size: 0.9rem; }
+}
+  </style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<section id="login-section">
+  <h1>Painel do Administrador</h1>
+  <input type="email" id="admin-email" placeholder="E-mail" />
+  <input type="password" id="admin-senha" placeholder="Senha" />
+  <button id="btn-login">Entrar</button>
+  <p id="login-erro"></p>
+</section>
+
+<!-- ===== PAINEL ===== -->
+<section id="painel-admin" style="display:none;">
+  <h1>Gerenciamento de Itens</h1>
+  <button id="btn-logout">Sair</button>
+
+  <div id="loading-itens">Carregando itens...</div>
+
+  <div id="itens-container" style="display:none;">
+
+    <!-- STATUS DA LOJA -->
+    <div class="admin-section">
+      <h2>Status da Loja</h2>
+      <div>
+        <input type="checkbox" id="loja-fechada">
+        <label for="loja-fechada">Fechar Loja</label>
+      </div>
+    </div>
+
+    <!-- CREMES -->
+    <div class="admin-section" id="cremes-container">
+      <h2>Cremes</h2>
+      <div><input type="checkbox" id="creme-de-acai"><label for="creme-de-acai">Creme de Açaí</label></div>
+      <div><input type="checkbox" id="creme-de-cupuacu"><label for="creme-de-cupuacu">Creme de Cupuaçu</label></div>
+      <div><input type="checkbox" id="creme-de-morango"><label for="creme-de-morango">Creme de Morango</label></div>
+      <div><input type="checkbox" id="creme-de-pacoca"><label for="creme-de-pacoca">Creme de Paçoca</label></div>
+      <div><input type="checkbox" id="creme-de-ovomaltine"><label for="creme-de-ovomaltine">Creme de Ovomaltine</label></div>
+      <div><input type="checkbox" id="creme-de-tapioca"><label for="creme-de-tapioca">Creme de Tapioca</label></div>
+      <div><input type="checkbox" id="creme-de-ninho-nutella"><label for="creme-de-ninho-nutella">Creme de Ninho c/ Nutella</label></div>
+      <div><input type="checkbox" id="creme-de-ninho-oreo"><label for="creme-de-ninho-oreo">Creme de Ninho c/ Oreo</label></div>
+    </div>
+
+    <!-- FRUTAS -->
+    <div class="admin-section" id="frutas-container">
+      <h2>Frutas</h2>
+      <div><input type="checkbox" id="fruta-banana"><label for="fruta-banana">Banana</label></div>
+      <div><input type="checkbox" id="fruta-abacaxi"><label for="fruta-abacaxi">Abacaxi</label></div>
+      <div><input type="checkbox" id="fruta-manga"><label for="fruta-manga">Manga</label></div>
+      <div><input type="checkbox" id="fruta-uva"><label for="fruta-uva">Uva</label></div>
+      <div><input type="checkbox" id="fruta-morango"><label for="fruta-morango">Morango (extra R$ 2,00)</label></div>
+      <div><input type="checkbox" id="fruta-kiwi"><label for="fruta-kiwi">Kiwi (extra R$ 2,00)</label></div>
+    </div>
+
+    <!-- ADICIONAIS -->
+    <div class="admin-section" id="adicionais-container">
+      <h2>Adicionais</h2>
+      <div><input type="checkbox" id="adicional-leite-em-po"><label for="adicional-leite-em-po">Leite em pó</label></div>
+      <div><input type="checkbox" id="adicional-granola"><label for="adicional-granola">Granola</label></div>
+      <div><input type="checkbox" id="adicional-leite-condensado"><label for="adicional-leite-condensado">Leite condensado</label></div>
+      <div><input type="checkbox" id="adicional-bis"><label for="adicional-bis">Bis</label></div>
+      <div><input type="checkbox" id="adicional-pacoca"><label for="adicional-pacoca">Paçoca</label></div>
+      <div><input type="checkbox" id="adicional-granulado"><label for="adicional-granulado">Granulado</label></div>
+      <div><input type="checkbox" id="adicional-calda-chocolate"><label for="adicional-calda-chocolate">Calda de chocolate</label></div>
+      <div><input type="checkbox" id="adicional-calda-morango"><label for="adicional-calda-morango">Calda de morango</label></div>
+      <div><input type="checkbox" id="adicional-mel"><label for="adicional-mel">Mel</label></div>
+      <div><input type="checkbox" id="adicional-chocopower"><label for="adicional-chocopower">Chocopower</label></div>
+      <div><input type="checkbox" id="adicional-mm"><label for="adicional-mm">MM's</label></div>
+      <div><input type="checkbox" id="adicional-jujuba"><label for="adicional-jujuba">Jujuba</label></div>
+      <div><input type="checkbox" id="adicional-canudo-waffer"><label for="adicional-canudo-waffer">Canudo waffer</label></div>
+      <div><input type="checkbox" id="adicional-farinha-amedoim"><label for="adicional-farinha-amedoim">Farinha de amendoim</label></div>
+      <div><input type="checkbox" id="adicional-sucrilhos"><label for="adicional-sucrilhos">Sucrilhos</label></div>
+      <div><input type="checkbox" id="adicional-chocoboll"><label for="adicional-chocoboll">Chocoboll</label></div>
+      <div><input type="checkbox" id="adicional-gotas-chocolate"><label for="adicional-gotas-chocolate">Gotas de chocolate</label></div>
+    </div>
+
+    <!-- EXTRAS -->
+    <div class="admin-section" id="extras-container">
+      <h2>Adicionais Extras</h2>
+      <div><input type="checkbox" id="extra-batom-garoto"><label for="extra-batom-garoto">Batom Garoto (R$ 3,00)</label></div>
+      <div><input type="checkbox" id="extra-kit-kat"><label for="extra-kit-kat">Kit Kat (R$ 3,00)</label></div>
+      <div><input type="checkbox" id="extra-nutella"><label for="extra-nutella">Nutella (R$ 5,00)</label></div>
+      <div><input type="checkbox" id="extra-biscoito-oreo"><label for="extra-biscoito-oreo">Biscoito Oreo (R$ 3,00)</label></div>
+      <div><input type="checkbox" id="extra-farinha-lactea"><label for="extra-farinha-lactea">Farinha Láctea (R$ 3,00)</label></div>
+      <div><input type="checkbox" id="extra-po-ovomaltine"><label for="extra-po-ovomaltine">Pó de Ovomaltine (R$ 3,00)</label></div>
+    </div>
+
+    <!-- TAÇAS -->
+    <div class="admin-section" id="tacas-container">
+      <h2>Taças</h2>
+      <div><input type="checkbox" id="taca-ninho"><label for="taca-ninho">Taça de Ninho</label></div>
+      <div><input type="checkbox" id="taca-sensacao"><label for="taca-sensacao">Taça Sensação</label></div>
+      <div><input type="checkbox" id="taca-abacaxi"><label for="taca-abacaxi">Taça Delícia de Abacaxi</label></div>
+      <div><input type="checkbox" id="taca-grego"><label for="taca-grego">Taça Iogurte Grego</label></div>
+    </div>
+
+    <!-- MILKSHAKES -->
+    <div class="admin-section" id="milkshakes-container">
+      <h2>Milkshakes</h2>
+      <div><input type="checkbox" id="milk-morango"><label for="milk-morango">Milkshake Morango</label></div>
+      <div><input type="checkbox" id="milk-ovomaltine"><label for="milk-ovomaltine">Milkshake Ovomaltine</label></div>
+    </div>
+
+  </div><!-- /itens-container -->
+</section>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDRefehcoSfaBvap52CIrEpHOo7wvZvMYA",
+  authDomain: "acaiteria-9d5df.firebaseapp.com",
+  projectId: "acaiteria-9d5df",
+  storageBucket: "acaiteria-9d5df.firebasestorage.app",
+  messagingSenderId: "391805472429",
+  appId: "1:391805472429:web:fcb90692c4e94464e2c024"
+};
+
+const ADMIN_DOC_ID = 'D5ZMKEEZYyGrzWv2sOW3';
+
+const CATEGORIAS = {
+  'cremes-container':     'cremes',
+  'frutas-container':     'frutas',
+  'adicionais-container': 'adicionais',
+  'extras-container':     'extras',
+  'tacas-container':      'tacas',
+  'milkshakes-container': 'milkshakes'
+};
+
+const PREFIXOS = ['fruta-','adicional-','extra-','milk-','taca-','creme-'];
+
+// ---- Init Firebase ----
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ---- Elementos ----
+const loginSection   = document.getElementById('login-section');
+const painelAdmin    = document.getElementById('painel-admin');
+const emailInput     = document.getElementById('admin-email');
+const senhaInput     = document.getElementById('admin-senha');
+const btnLogin       = document.getElementById('btn-login');
+const btnLogout      = document.getElementById('btn-logout');
+const erroMsg        = document.getElementById('login-erro');
+const loadingItens   = document.getElementById('loading-itens');
+const itensContainer = document.getElementById('itens-container');
+const checkboxLoja   = document.getElementById('loja-fechada');
+
+// Guarda os unsubscribes para cancelar listeners ao fazer logout
+let unsubscribes = [];
+
+// ---- Feedback "✓ Salvo" ----
+function mostrarSalvo(parentEl) {
+  const antigo = parentEl.querySelector('.salvo');
+  if (antigo) antigo.remove();
+  const span = document.createElement('span');
+  span.className = 'salvo';
+  span.textContent = '✓ Salvo';
+  span.style.cssText = 'color: green; font-size: 0.8rem; margin-left: 10px;';
+  parentEl.appendChild(span);
+  setTimeout(() => span.remove(), 2000);
+}
+
+// ---- Login ----
+btnLogin.addEventListener('click', async () => {
+  const email = emailInput.value.trim();
+  const senha = senhaInput.value.trim();
+  if (!email || !senha) { erroMsg.textContent = "Preencha todos os campos!"; return; }
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    erroMsg.textContent = "";
+  } catch {
+    erroMsg.textContent = "E-mail ou senha incorretos.";
+  }
+});
+
+// ---- Logout ----
+btnLogout.addEventListener('click', () => {
+  // Cancela todos os listeners antes de sair
+  unsubscribes.forEach(unsub => unsub());
+  unsubscribes = [];
+  auth.signOut();
+});
+
+// ---- Auth state ----
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loginSection.style.display = 'none';
+    painelAdmin.style.display  = 'block';
+    carregarTudo();
+  } else {
+    loginSection.style.display = 'flex';
+    painelAdmin.style.display  = 'none';
+  }
+});
+
+// ---- Status da loja ----
+const lojaRef = db.collection('config').doc('status');
+
+checkboxLoja.addEventListener('change', async () => {
+  const fechada = checkboxLoja.checked;
+  try {
+    await lojaRef.set({
+      fechada,
+      ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    mostrarSalvo(checkboxLoja.parentElement);
+  } catch {
+    alert('Erro ao salvar status da loja!');
+    checkboxLoja.checked = !fechada;
+  }
+});
+
+// ---- Nome base ----
+function nomeBase(itemId) {
+  for (const p of PREFIXOS) {
+    if (itemId.startsWith(p)) return itemId.slice(p.length);
+  }
+  return itemId;
+}
+
+// ---- Carregar tudo ----
+function carregarTudo() {
+  loadingItens.style.display   = 'block';
+  itensContainer.style.display = 'none';
+
+  // Status loja em tempo real
+  const unsubLoja = lojaRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      checkboxLoja.checked = doc.data().fechada === true;
+    } else {
+      lojaRef.set({ fechada: false });
+      checkboxLoja.checked = false;
+    }
+  }, (e) => console.error('Erro status loja:', e));
+  unsubscribes.push(unsubLoja);
+
+  // Ingredientes em tempo real
+  for (const [containerId, categoria] of Object.entries(CATEGORIAS)) {
+    carregarCategoria(containerId, categoria);
+  }
+
+  // Mostra o painel após iniciar os listeners
+  loadingItens.style.display   = 'none';
+  itensContainer.style.display = 'grid';
+}
+
+// ---- Carregar categoria com onSnapshot (tempo real) ----
+function carregarCategoria(containerId, categoria) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+  checkboxes.forEach(cb => {
+    const nome   = nomeBase(cb.id);
+    const docRef = db.collection('itens').doc(ADMIN_DOC_ID).collection(categoria).doc(nome);
+
+    // Escuta mudanças em tempo real
+    const unsub = docRef.onSnapshot((snap) => {
+      if (snap.exists) {
+        cb.checked = snap.data().bloqueado === true;
+      } else {
+        docRef.set({ bloqueado: false });
+        cb.checked = false;
+      }
+    }, (e) => console.error(`Erro em ${nome}:`, e));
+
+    unsubscribes.push(unsub);
+
+    // Salva quando o admin clica
+    cb.addEventListener('change', async () => {
+      const bloqueado = cb.checked;
+      try {
+        await docRef.set({ bloqueado });
+        mostrarSalvo(cb.parentElement);
+      } catch {
+        alert(`Erro ao salvar ${nome}`);
+        cb.checked = !bloqueado;
+      }
+    });
+  });
+}
+</script>
+</body>
+</html>
